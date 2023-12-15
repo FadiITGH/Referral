@@ -1,0 +1,100 @@
+﻿@page "/"
+@using Referral.BackEnd.Interfaces
+@using Referral.Models
+@inject IDep _Dep
+
+
+
+<div style="border:solid;padding:20px;background-color:whitesmoke;border-color:darkblue; border-radius:10px">
+        <form dir="rtl">
+            <div class="row row-cols-lg-4 row-cols-md-2 row-cols-sm-1 row-cols-1" >
+                <div class="col" >
+                    <label>اسم المريض</label>
+                    <input type="text" placeholder="الاسم الكامل..." class="form-control" />
+                </div>
+                <div class="col">
+                    <label>القسم</label>
+                    <select class="form-control">
+                        <option>اختر القسم رجاءاً...</option>
+                        @foreach (var item in ListofDepts)
+                        {
+                            <option value="@item.Id">@item.DepName</option>
+                        }
+                    </select>
+                </div>
+                @* <div class="col">
+                    <label>الدائرة</label>
+                    <select class="form-control">
+                        <option selected>اختر الدائرة...</option>
+                        <option>مكتب السيد الوزير</option>
+                        <option>مكتب السيد الوكيل</option>
+                        <option>مكتب السيد المستشار</option>
+                        <option>دائرة التخطيط والمتابعة</option>
+                        <option>الدائرة الادارية والمالية</option>
+                        <option>الدائرة القانونية والعقود</option>
+                    </select>
+                </div> *@
+                <div class="col">
+                    <label>تاريخ الاجازة من...</label>
+                    <input type="date" placeholder="من..." class="form-control" />
+                </div>
+                <div class="col">
+                    <label>تاريخ انتهاء الاجازة...</label>
+                    <input type="date" placeholder="الى..." class="form-control" />
+                </div>
+            </div>
+            <br />
+            <div class="row row-cols-lg-2 row-cols-md-2 row-cols-sm-1 row-cols-1" >
+                <div class="col">
+                    <label>الاحــالة...</label>
+                    <textarea class="form-control" rows="3"></textarea>
+                    @*<input type="text" placeholder="الملاحظات..." class="form-label"/>
+                    *@
+                </div>
+                <div class="col">
+                    <label>الملاحظات...</label>
+                    <textarea class="form-control" rows="3"></textarea>
+    @*                <input type="text" placeholder="الملاحظات..." class="form-label"/>
+    *@      
+                </div>
+            </div>
+            <br />
+         
+            <div class="row row-cols-lg-2 row-cols-md-2 row-cols-sm-1 row-cols-1">
+                <div class="col">
+                    <label >صورة العيادة المرضية...</label>
+                    <input class="form-control" type="file"  multiple>
+                </div>
+                <div class="col">
+                    <label>تاريخ التحديث...</label>
+
+                <input type="date" id="currentDateInput" name="currentDateInput" value="" class="form-control" readonly />
+                </div>
+           
+            </div>
+
+           
+            <br />
+            <button type="button" class="btn btn-outline-primary form-control">حفظ البيانات</button>
+        </form>
+</div>
+
+
+
+@code{
+
+    public List<DepModel> ListofDepts { get; set; } = new List<DepModel>();
+    public DepModel NewDep = new DepModel();
+
+    protected async override Task OnInitializedAsync()
+    {
+        ListofDepts = await _Dep.GetAllDepts();
+        
+
+    }
+
+
+    
+
+}
+   

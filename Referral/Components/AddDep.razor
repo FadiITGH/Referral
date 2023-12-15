@@ -1,0 +1,43 @@
+﻿@page "/addDep"
+@using Referral.BackEnd.Interfaces
+@using Referral.Models
+
+@inject IDep _Dep
+@inject IJSRuntime _js
+
+
+
+<form @onsubmit="AddNewDepToDb">
+    <div class="row">
+        <div class="col">
+            <input @bind="NewDep.DepName" type="text" placeholder="ادخل اسم القسم رجاءً" required class="form-control" />
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-outline-primary form-control col-4">اضف القسم</button>
+        </div>
+    </div>
+</form>
+
+
+
+
+@code {
+    public List<DepModel> ListOfAllDepts { get; set; } = new List<DepModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListOfAllDepts = await _Dep.GetAllDepts();
+    }
+
+
+    public DepModel NewDep { get; set; } = new DepModel();
+
+    private async Task AddNewDepToDb()
+    {
+        var MessageFromRepo = await _Dep.AddNewDep(NewDep);
+
+        await _js.InvokeVoidAsync("alert", MessageFromRepo);
+
+    }
+
+}
