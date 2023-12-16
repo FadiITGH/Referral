@@ -25,7 +25,7 @@ namespace Referral.BackEnd.Repos
             {
                await _Db.DepTable.AddAsync(NewDep);
                await _Db.SaveChangesAsync();
-               return $"تمت اضافة قسم {NewDep.DepName} بنجاح...";
+               return $"تم اضافة قسم {NewDep.DepName} بنجاح...";
             }
             else
             {

@@ -5,18 +5,34 @@
 @inject IDep _Dep
 @inject IJSRuntime _js
 
+<h3 style="font-family:Almarai;color:darkblue;" >
+    <center>
+        <b>
+            اضافة قسم جديد
+        </b>
+    </center>
+</h3>
+<br />
 
 
-<form @onsubmit="AddNewDepToDb">
-    <div class="row">
-        <div class="col">
-            <input @bind="NewDep.DepName" type="text" placeholder="ادخل اسم القسم رجاءً" required class="form-control" />
+<div style="font-family:Almarai;border:solid;padding:20px;background-color:whitesmoke;border-color:darkblue; border-radius:10px">
+    <form @onsubmit="AddNewDepToDb" dir="rtl">
+        <div class="row">
+            <div class="col">
+                <b><input @bind="NewDep.DepName" type="text" placeholder="ادخل اسم القسم رجاءً..." required class="form-control" /></b>
+                
+            </div>
         </div>
-        <div class="col">
-            <button type="submit" class="btn btn-outline-primary form-control col-4">اضف القسم</button>
+        <br />
+        <div>
+            <div class="col">
+                <button type="submit" class="btn btn-outline-primary form-control col-4"><b>اضف القسم</b></button>
+            </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
+
+
 
 
 

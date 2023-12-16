@@ -2,19 +2,34 @@
 @using Referral.BackEnd.Interfaces
 @using Referral.Models
 @inject IDep _Dep
+@inject IJSRuntime _js
 
 
 
-<div style="border:solid;padding:20px;background-color:whitesmoke;border-color:darkblue; border-radius:10px">
+
+<h4 style="font-family:Almarai;color:darkblue;">
+    <center>
+        <b>
+            نظام الاجازات المرضية/ المركز الصحي
+        </b>
+    </center>
+</h4>
+<br />
+
+
+
+<div style="font-family:Almarai;border:solid;padding:20px;background-color:whitesmoke;border-color:darkblue; border-radius:10px">
         <form dir="rtl">
             <div class="row row-cols-lg-4 row-cols-md-2 row-cols-sm-1 row-cols-1" >
                 <div class="col" >
                     <label>اسم المريض</label>
-                    <input type="text" placeholder="الاسم الكامل..." class="form-control" />
+                    <input @bind-value="@EmpData.EmpFullName" type="text" placeholder="الاسم الكامل..." class="form-control" />
                 </div>
                 <div class="col">
                     <label>القسم</label>
-                    <select class="form-control">
+                    @* <select @bind="EmpData.EmpDep" class="form-control"> *@
+
+                    <select @bind="@EmpData.EmpDep" class="form-control">
                         <option>اختر القسم رجاءاً...</option>
                         @foreach (var item in ListofDepts)
                         {
@@ -36,24 +51,24 @@
                 </div> *@
                 <div class="col">
                     <label>تاريخ الاجازة من...</label>
-                    <input type="date" placeholder="من..." class="form-control" />
+                    <input @bind-value="@EmpData.DateFrom" type="date" placeholder="من..." class="form-control" />
                 </div>
                 <div class="col">
                     <label>تاريخ انتهاء الاجازة...</label>
-                    <input type="date" placeholder="الى..." class="form-control" />
+                    <input @bind-value="@EmpData.DateTo" type="date" placeholder="الى..." class="form-control" />
                 </div>
             </div>
             <br />
             <div class="row row-cols-lg-2 row-cols-md-2 row-cols-sm-1 row-cols-1" >
                 <div class="col">
                     <label>الاحــالة...</label>
-                    <textarea class="form-control" rows="3"></textarea>
+                    <textarea @bind="EmpData.RefNote" class="form-control" rows="3"></textarea>
                     @*<input type="text" placeholder="الملاحظات..." class="form-label"/>
                     *@
                 </div>
                 <div class="col">
                     <label>الملاحظات...</label>
-                    <textarea class="form-control" rows="3"></textarea>
+                    <textarea @bind="@EmpData.Notes" class="form-control" rows="3"></textarea>
     @*                <input type="text" placeholder="الملاحظات..." class="form-label"/>
     *@      
                 </div>
@@ -62,13 +77,23 @@
          
             <div class="row row-cols-lg-2 row-cols-md-2 row-cols-sm-1 row-cols-1">
                 <div class="col">
-                    <label >صورة العيادة المرضية...</label>
-                    <input class="form-control" type="file"  multiple>
+                <label>صورة العيادة المرضية...</label>
+                <InputFile accept=".jpg,.jpeg" class="form-control" OnChange="CheckFile"></InputFile>
                 </div>
+                
+
+
+
+              @*   <div class="col">
+                    <label >صورة العيادة المرضية...</label>
+                    <input @bind-value="@EmpData.RefImagePath" class="form-control" type="file"  >
+                </div> *@
+
+              @* multiple *@
+
                 <div class="col">
                     <label>تاريخ التحديث...</label>
-
-                <input type="date" id="currentDateInput" name="currentDateInput" value="" class="form-control" readonly />
+                    <input @bind-value="@EmpData.UpdateDate" type="date" id="currentDateInput" name="currentDateInput" class="form-control" readonly />
                 </div>
            
             </div>
@@ -85,13 +110,42 @@
 
     public List<DepModel> ListofDepts { get; set; } = new List<DepModel>();
     public DepModel NewDep = new DepModel();
+    public ReferralModel EmpData { get; set; } = new ReferralModel();
+
 
     protected async override Task OnInitializedAsync()
     {
         ListofDepts = await _Dep.GetAllDepts();
-        
+        EmpData.UpdateDate = DateTime.Now;
+        EmpData.DateFrom = DateTime.Now;
+        EmpData.DateTo = DateTime.Now;
+
+
 
     }
+
+    private async Task CheckFile(InputFileChangeEventArgs UploadedFile)
+    {
+        if (UploadedFile.File.ContentType == "image/jpg" || UploadedFile.File.ContentType == "image/jpeg")
+        {
+            if (UploadedFile.File.Size > 2000000)
+            {
+                await _js.InvokeVoidAsync("alert", "حجم الصورة اكبر من 2MB ... يرجى تقليل حجم الصورة");
+            }
+            else
+            {
+                await _js.InvokeVoidAsync("alert", "تم رفع الصورة...");
+                // UplaodedUserImage = UploadedFile;
+                // FirstUImage = UploadedFile;
+            }
+        }
+        else
+        {
+            await _js.InvokeVoidAsync("alert", "يجب ان تكون صيغة الصورة .jpg او .jpeg");
+            return;
+        }
+    }
+
 
 
     
