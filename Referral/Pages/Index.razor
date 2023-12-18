@@ -1,8 +1,12 @@
 ﻿@page "/"
 @using Referral.BackEnd.Interfaces
 @using Referral.Models
+
+
 @inject IDep _Dep
 @inject IJSRuntime _js
+@inject IWebHostEnvironment _env
+@inject IEmp _Emp
 
 
 
@@ -19,7 +23,7 @@
 
 
 <div style="font-family:Almarai;border:solid;padding:20px;background-color:whitesmoke;border-color:darkblue; border-radius:10px">
-        <form dir="rtl">
+        <form @onsubmit="SaveData" dir="rtl">
             <div class="row row-cols-lg-4 row-cols-md-2 row-cols-sm-1 row-cols-1" >
                 <div class="col" >
                     <label>اسم المريض</label>
@@ -30,7 +34,7 @@
                     @* <select @bind="EmpData.EmpDep" class="form-control"> *@
 
                     <select @bind="@EmpData.EmpDep" class="form-control">
-                        <option>اختر القسم رجاءاً...</option>
+                        <option>اختر القسم من القائمة...</option>
                         @foreach (var item in ListofDepts)
                         {
                             <option value="@item.Id">@item.DepName</option>
@@ -78,7 +82,7 @@
             <div class="row row-cols-lg-2 row-cols-md-2 row-cols-sm-1 row-cols-1">
                 <div class="col">
                 <label>صورة العيادة المرضية...</label>
-                <InputFile accept=".jpg,.jpeg" class="form-control" OnChange="CheckFile"></InputFile>
+                <InputFile accept=".jpg,.jpeg,.pdf,.png,.tif" class="form-control" OnChange="CheckFile"></InputFile>
                 </div>
                 
 
@@ -100,7 +104,7 @@
 
            
             <br />
-            <button type="button" class="btn btn-outline-primary form-control">حفظ البيانات</button>
+            <button type="submit" class="btn btn-outline-primary form-control">حفظ البيانات</button>
         </form>
 </div>
 
@@ -111,6 +115,8 @@
     public List<DepModel> ListofDepts { get; set; } = new List<DepModel>();
     public DepModel NewDep = new DepModel();
     public ReferralModel EmpData { get; set; } = new ReferralModel();
+
+    public InputFileChangeEventArgs UploadedRefImage { get; set; }
 
 
     protected async override Task OnInitializedAsync()
@@ -124,9 +130,39 @@
 
     }
 
+    private async Task SaveData()
+    {
+        var UserResponse = await _js.InvokeAsync<bool>("confirm","هل تود حفظ بيانات المريض؟");
+        if (UserResponse)
+        {
+            var CheckUserExists = await _Emp.CheckIfUserExistsInDB(EmpData.RefImagePath);
+            if (CheckUserExists is true)
+            {
+                await _js.InvokeVoidAsync("alert", "هذا القيد موجود مسبقاً");
+                EmpData = new ReferralModel();
+                EmpData.DateFrom = DateTime.Now;
+                EmpData.DateTo = DateTime.Now;
+                EmpData.RefImagePath = "";
+            }
+            else
+            {
+                EmpData.RefImagePath = await UploadRefImageToFileSystem();
+                var BackEndResponse = await _Emp.AddNewRefToSystem(EmpData);
+                await _js.InvokeVoidAsync("alert", BackEndResponse);
+                EmpData = new ReferralModel();
+                EmpData.DateFrom = DateTime.Now;
+                EmpData.DateTo = DateTime.Now;
+                EmpData.RefImagePath = "";
+
+            }
+        }
+    }
+
     private async Task CheckFile(InputFileChangeEventArgs UploadedFile)
     {
-        if (UploadedFile.File.ContentType == "image/jpg" || UploadedFile.File.ContentType == "image/jpeg")
+        if (UploadedFile.File.ContentType == "image/jpg" || UploadedFile.File.ContentType == "image/jpeg" 
+        || UploadedFile.File.ContentType == "image/png" || UploadedFile.File.ContentType == "image/pdf" 
+        || UploadedFile.File.ContentType == "image/tif")
         {
             if (UploadedFile.File.Size > 2000000)
             {
@@ -135,15 +171,39 @@
             else
             {
                 await _js.InvokeVoidAsync("alert", "تم رفع الصورة...");
-                // UplaodedUserImage = UploadedFile;
+                // EmpData.RefImagePath = await UploadRefImageToFileSystem();
+                UploadedRefImage = UploadedFile;
                 // FirstUImage = UploadedFile;
             }
         }
         else
         {
-            await _js.InvokeVoidAsync("alert", "يجب ان تكون صيغة الصورة .jpg او .jpeg");
+            await _js.InvokeVoidAsync("alert", "يجب ان تكون صيغة الصورة .jpg او .jpeg او .png");
             return;
         }
+    }
+
+    private async Task<string> UploadRefImageToFileSystem()
+    {
+        var FileName = UploadedRefImage.File.Name + "_" + Guid.NewGuid().ToString() + $"{UploadedRefImage.File.Name}";
+
+        var FolderPath = $"{_env.WebRootPath}\\RefImages";
+
+        var FullPath = Path.Combine(FolderPath, FileName);
+
+        var MemoryStream = new MemoryStream();
+
+        await UploadedRefImage.File.OpenReadStream().CopyToAsync(MemoryStream);
+
+        await using (var fs = new FileStream(FullPath, FileMode.Create, FileAccess.Write))
+        {
+            MemoryStream.WriteTo(fs);
+        }
+
+        return FullPath;
+
+
+
     }
 
 

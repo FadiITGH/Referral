@@ -19,7 +19,7 @@
     <form @onsubmit="AddNewDepToDb" dir="rtl">
         <div class="row">
             <div class="col">
-                <b><input @bind="NewDep.DepName" type="text" placeholder="ادخل اسم القسم رجاءً..." required class="form-control" /></b>
+                <b><input @bind="NewDep.DepName" type="text" placeholder="ادخل اسم القسم..." required class="form-control" /></b>
                 
             </div>
         </div>
@@ -53,6 +53,7 @@
         var MessageFromRepo = await _Dep.AddNewDep(NewDep);
 
         await _js.InvokeVoidAsync("alert", MessageFromRepo);
+        NewDep = new DepModel();
 
     }
 

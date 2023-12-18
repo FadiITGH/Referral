@@ -27,7 +27,7 @@ builder.Services.AddSingleton<WeatherForecastService>();
 
 
 builder.Services.AddScoped<IDep, RepoDep>();
-
+builder.Services.AddScoped<IEmp, EmpRepo>();
 
 
 var app = builder.Build();
