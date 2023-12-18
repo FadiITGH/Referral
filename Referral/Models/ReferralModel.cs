@@ -7,7 +7,8 @@ namespace Referral.Models
     {
         public int Id { get; set; }
 
-        [Required (ErrorMessage ="الرجاء ادخال الاسم الكامل")]
+        [Required]
+        [MaxLength(40, ErrorMessage = "الرجاء ادخال الاسم الكامل على ان لا يتجاوز 40 حرف...")]
         public string EmpFullName { get; set; }
 
 

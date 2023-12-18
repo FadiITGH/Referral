@@ -23,7 +23,9 @@
 
 
 <div style="font-family:Almarai;border:solid;padding:20px;background-color:whitesmoke;border-color:darkblue; border-radius:10px">
-        <form @onsubmit="SaveData" dir="rtl">
+    <EditForm OnSubmit="SaveData" dir="rtl" Model="EmpData">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
             <div class="row row-cols-lg-4 row-cols-md-2 row-cols-sm-1 row-cols-1" >
                 <div class="col" >
                     <label>اسم المريض</label>
@@ -105,7 +107,7 @@
            
             <br />
             <button type="submit" class="btn btn-outline-primary form-control">حفظ البيانات</button>
-        </form>
+        </EditForm>
 </div>
 
 
@@ -193,7 +195,7 @@
 
         var MemoryStream = new MemoryStream();
 
-        await UploadedRefImage.File.OpenReadStream().CopyToAsync(MemoryStream);
+        await UploadedRefImage.File.OpenReadStream(2000000).CopyToAsync(MemoryStream);
 
         await using (var fs = new FileStream(FullPath, FileMode.Create, FileAccess.Write))
         {
