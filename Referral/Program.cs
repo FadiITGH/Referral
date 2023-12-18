@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using Referral.Areas.Identity;
 using Referral.BackEnd.Interfaces;
 using Referral.BackEnd.Repos;
@@ -28,6 +29,8 @@ builder.Services.AddSingleton<WeatherForecastService>();
 
 builder.Services.AddScoped<IDep, RepoDep>();
 builder.Services.AddScoped<IEmp, EmpRepo>();
+builder.Services.AddMudServices();
+
 
 
 var app = builder.Build();
