@@ -6,5 +6,6 @@ namespace Referral.BackEnd.Interfaces
     {
         public Task<bool> CheckIfUserExistsInDB(string RefImagePath);
         public Task<string> AddNewRefToSystem(ReferralModel NewRef);
+        public Task<List<ReferralModel>> GetListOfAllRefs();
     }
 }

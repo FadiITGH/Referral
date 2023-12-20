@@ -33,5 +33,11 @@ namespace Referral.BackEnd.Repos
                 return true;
             }
         }
+
+        public async Task<List<ReferralModel>> GetListOfAllRefs()
+        {
+            var ListOfRefs = await _db.ReferralTable.Include(a=>a.DeptTable).ToListAsync();
+            return ListOfRefs;
+        }
     }
 }

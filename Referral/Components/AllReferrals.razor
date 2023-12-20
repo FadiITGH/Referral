@@ -2,16 +2,110 @@
 @page "/AllReports"
 
 
-<h4>Test All Reports</h4>
+
+@using System.Net.Http.Json
+@using Referral.BackEnd.Interfaces
+@using Referral.Models
+@inject IEmp _Emp
+
+
+<MudDataGrid T="ReferralModel" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+             Hideable="true" RowClick="@RowClicked"  SelectedItemsChanged="@SelectedItemsChanged">        @* RowContextMenuClick="RowRightClicked" *@
+    <ToolBarContent>
+        <MudText Typo="Typo.h6" Style="font-family:Almarai;color:darkblue"><b>جدول الاحالات المرضية</b></MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="ReferralModel" />
+        <PropertyColumn Property="x => x.Id" Title="التسلسل" Sortable="true" Filterable="false" />
+        <PropertyColumn Property="x => x.EmpFullName" Title="اسم المريض" Sortable="true" Filterable="false" />        @* x.Number" Title="Nr" Sortable="false" Filterable="false" *@
+        <PropertyColumn Property="x => x.DeptTable.DepName" Title="القسم" Sortable="true" />    @* x.EmpDep *@
+        <PropertyColumn Property="x => x.DateFrom" Title="تاريخ بدء الاجازة" SortBy="@_sortBy" />
+        <PropertyColumn Property="x => x.DateTo" Title="تاريخ انتهاء الاجازة" />
+        <PropertyColumn Property="x => x.UpdateDate" Title="تاريخ التحديث" />
+        @* <PropertyColumn Property="x => x.Group" Title="Category" /> *@
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="ReferralModel" />
+    </PagerContent>
+</MudDataGrid>
+
+<div class="d-flex flex-wrap mt-4">
+    <MudSwitch @bind-Checked="@_sortNameByLength" Color="Color.Primary">Sort Name Column By Length</MudSwitch>
+</div>
+
+<MudExpansionPanels Style="flex:1">
+    <MudExpansionPanel Text="Show Events">
+        @foreach (var message in _events)
+        {
+            <MudText Typo="@Typo.body2">@message</MudText>
+        }
+        @if (_events.Count > 0)
+        {
+            <div class="d-flex">
+                <MudSpacer />
+                <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="@(() => _events.Clear())">Clear</MudButton>
+            </div>
+        }
+    </MudExpansionPanel>
+</MudExpansionPanels>
 
 
 
 
 
-@code{
+@code {
+    private IEnumerable<ReferralModel> Elements = new List<ReferralModel>();
+    private string _searchString;
+    private bool _sortNameByLength;
+    private List<string> _events = new();
+    // custom sort by name length
+    private Func<ReferralModel, object> _sortBy => x =>
+    {
+        if (_sortNameByLength)
+            return x.EmpFullName.Length;
+        else
+            return x.EmpFullName;
+    };
+    // quick filter - filter globally across multiple columns with the same input
+    private Func<ReferralModel, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
 
+        if (x.EmpFullName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
 
+        if (x.DeptTable.DepName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
 
+        if ($"{x.UpdateDate.ToString()}".Contains(_searchString))    /* {x.Position} {x.Molar} */
+            return true;
 
+        return false;
+    };
 
+    protected override async Task OnInitializedAsync()
+    {
+        Elements = await _Emp.GetListOfAllRefs();
+    }
+
+    // events
+    void RowClicked(DataGridRowClickEventArgs<ReferralModel> args)
+    {
+        _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
+    }
+
+    void RowRightClicked(DataGridRowClickEventArgs<ReferralModel> args)
+    {
+        _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
+    }
+
+    void SelectedItemsChanged(HashSet<ReferralModel> items)
+    {
+        _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
+    }
 }
+
