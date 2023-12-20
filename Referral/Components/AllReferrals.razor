@@ -7,6 +7,7 @@
 @using Referral.BackEnd.Interfaces
 @using Referral.Models
 @inject IEmp _Emp
+@inject IJSRuntime _js
 
 
 <MudDataGrid T="ReferralModel" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
@@ -25,14 +26,29 @@
         <PropertyColumn Property="x => x.DateFrom" Title="تاريخ بدء الاجازة" SortBy="@_sortBy" />
         <PropertyColumn Property="x => x.DateTo" Title="تاريخ انتهاء الاجازة" />
         <PropertyColumn Property="x => x.UpdateDate" Title="تاريخ التحديث" />
+        @* <PropertyColumn Property="x => x.RefImagePath" Title="صورة الاحالة المرضية" /> *@
         @* <PropertyColumn Property="x => x.Group" Title="Category" /> *@
     </Columns>
+    
+
+    
+
     <PagerContent>
+        <div class="row" style="font-family:Almarai" >
+           
+                <div class="col">
+                     <button class="btn btn-outline-danger form-control" ><b>حـذف</b></button>
+                </div>
+          
+        </div>
+        
+
         <MudDataGridPager T="ReferralModel" />
     </PagerContent>
+    
 </MudDataGrid>
 
-<div class="d-flex flex-wrap mt-4">
+@* <div class="d-flex flex-wrap mt-4">
     <MudSwitch @bind-Checked="@_sortNameByLength" Color="Color.Primary">Sort Name Column By Length</MudSwitch>
 </div>
 
@@ -51,7 +67,7 @@
         }
     </MudExpansionPanel>
 </MudExpansionPanels>
-
+ *@
 
 
 
@@ -106,6 +122,16 @@
     void SelectedItemsChanged(HashSet<ReferralModel> items)
     {
         _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
+
     }
+
+
+    private async Task DeleteRefs()
+    {
+        
+    }
+
+
+
 }
 

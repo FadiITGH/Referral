@@ -34,6 +34,48 @@ namespace Referral.BackEnd.Repos
             }
         }
 
+        
+
+        public async Task<string> DeleteRef(int EmpId)
+        {
+            try
+            {
+                var DeletedRef = await _db.ReferralTable.FirstOrDefaultAsync(a => a.Id == EmpId);
+                _db.ReferralTable.Remove(DeletedRef);
+                await _db.SaveChangesAsync();
+                return $"تم حذف {EmpId} ";
+            }
+            catch (Exception error)
+            {
+                return error.Message;
+                
+            }
+            
+
+        }
+
+        public async Task<string> DeleteListOfRefs(List<int> ListOfDeletedRefs)
+        {
+            try
+            {
+                var ListOfDeletedRef = new List<ReferralModel>();
+                foreach (var item in ListOfDeletedRefs)
+                {
+                    var Emp = await _db.ReferralTable.FirstOrDefaultAsync(a => a.Id == item);
+                    ListOfDeletedRef.Add(Emp);
+                }
+                _db.ReferralTable.RemoveRange(ListOfDeletedRef);
+                await _db.SaveChangesAsync();
+                return "تم حذف مجموعة الاحالات المرضية";
+
+            }
+            catch (Exception error)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<List<ReferralModel>> GetListOfAllRefs()
         {
             var ListOfRefs = await _db.ReferralTable.Include(a=>a.DeptTable).ToListAsync();

@@ -24,8 +24,8 @@ namespace Referral.Models
         public DateTime DateTo { get; set; }
 
 
-        public string RefNote { get; set; }
-        public string Notes { get; set; }
+        public string? RefNote { get; set; }
+        public string? Notes { get; set; }
 
         [Required]
         public string? RefImagePath { get; set; }
