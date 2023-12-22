@@ -66,14 +66,13 @@ namespace Referral.BackEnd.Repos
                 }
                 _db.ReferralTable.RemoveRange(ListOfDeletedRef);
                 await _db.SaveChangesAsync();
-                return "تم حذف مجموعة الاحالات المرضية";
+                return "تم الحذف بنجاح...";
 
             }
             catch (Exception error)
             {
 
-                throw;
-            }
+                return error.Message;            }
         }
 
         public async Task<List<ReferralModel>> GetListOfAllRefs()

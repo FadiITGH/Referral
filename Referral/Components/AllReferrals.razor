@@ -8,24 +8,27 @@
 @using Referral.Models
 @inject IEmp _Emp
 @inject IJSRuntime _js
+@inject ISnackbar _Sb
 
 
-<MudDataGrid T="ReferralModel" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+<MudDataGrid Style="font-family:Almarai;direction:rtl" T="ReferralModel" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="false" QuickFilter="@_quickFilter"
              Hideable="true" RowClick="@RowClicked"  SelectedItemsChanged="@SelectedItemsChanged">        @* RowContextMenuClick="RowRightClicked" *@
     <ToolBarContent>
         <MudText Typo="Typo.h6" Style="font-family:Almarai;color:darkblue"><b>جدول الاحالات المرضية</b></MudText>
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="DeleteRefs" Style="font-family:Almarai;margin-right:20px"><b>حـذف</b></MudButton>
+
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
         <SelectColumn T="ReferralModel" />
-        <PropertyColumn Property="x => x.Id" Title="التسلسل" Sortable="true" Filterable="false" />
+        @* <PropertyColumn Property="x => x.Id" Title="التسلسل" Sortable="true" Filterable="false" /> *@
         <PropertyColumn Property="x => x.EmpFullName" Title="اسم المريض" Sortable="true" Filterable="false" />        @* x.Number" Title="Nr" Sortable="false" Filterable="false" *@
         <PropertyColumn Property="x => x.DeptTable.DepName" Title="القسم" Sortable="true" />    @* x.EmpDep *@
-        <PropertyColumn Property="x => x.DateFrom" Title="تاريخ بدء الاجازة" SortBy="@_sortBy" />
-        <PropertyColumn Property="x => x.DateTo" Title="تاريخ انتهاء الاجازة" />
-        <PropertyColumn Property="x => x.UpdateDate" Title="تاريخ التحديث" />
+        <PropertyColumn Property="x => x.DateFrom" Title="تاريخ بدء الاجازة" Sortable="true" SortBy="@_sortBy" />
+        <PropertyColumn Property="x => x.DateTo" Title="تاريخ انتهاء الاجازة" Sortable="true" />
+        <PropertyColumn Property="x => x.UpdateDate" Title="تاريخ التحديث" Sortable="true" />
         @* <PropertyColumn Property="x => x.RefImagePath" Title="صورة الاحالة المرضية" /> *@
         @* <PropertyColumn Property="x => x.Group" Title="Category" /> *@
     </Columns>
@@ -34,13 +37,11 @@
     
 
     <PagerContent>
-        <div class="row" style="font-family:Almarai" >
-           
+        @* <div class="row" style="font-family:Almarai" >
                 <div class="col">
                      <button class="btn btn-outline-danger form-control" ><b>حـذف</b></button>
                 </div>
-          
-        </div>
+        </div> *@
         
 
         <MudDataGridPager T="ReferralModel" />
@@ -77,6 +78,9 @@
     private string _searchString;
     private bool _sortNameByLength;
     private List<string> _events = new();
+
+    public List<ReferralModel> ListOfDeletedRefs { get; set; } = new List<ReferralModel>();                 @* ListOfDeletedEmps *@
+
     // custom sort by name length
     private Func<ReferralModel, object> _sortBy => x =>
     {
@@ -122,13 +126,24 @@
     void SelectedItemsChanged(HashSet<ReferralModel> items)
     {
         _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
-
+        ListOfDeletedRefs = items.ToList();                              /*  ListOfDeletedEmps */
     }
 
 
     private async Task DeleteRefs()
     {
-        
+        var Response = await _js.InvokeAsync<bool>("confirm", "هل انت متأكد من حذف البيانات؟");
+        if (Response)
+        {
+            var BackEndResponse = await _Emp.DeleteListOfRefs(ListOfDeletedRefs.Select(a => a.Id).ToList());                  /* .Select(a => a.Id).ToList() */
+            _Sb.Add(BackEndResponse, Severity.Success);
+            Elements = await _Emp.GetListOfAllRefs();
+
+        }
+        else
+        {
+            return;
+        }
     }
 
 
